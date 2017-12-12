@@ -4,7 +4,7 @@
 
 NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 {
-    QHBoxLayout *layout = new QHBoxLayout(this);
+    QVBoxLayout *layout = new QVBoxLayout(this);
 
     QGroupBox *groupBox = new QGroupBox(tr("device data"));
 
@@ -43,6 +43,18 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     groupBox->setLayout(vbox);
 
     layout->addWidget(groupBox);
+
+    QWidget *desc_widget = new QWidget;
+    QFrame *line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    m_description = new QLabel("TODO: add description here ...");
+    QVBoxLayout *desc_layout = new QVBoxLayout(desc_widget);
+    desc_layout->addWidget(m_description);
+
+    layout->addWidget(line);
+    layout->addWidget(desc_widget);
 }
 
 void NodeDetail::setText(const QString &text)

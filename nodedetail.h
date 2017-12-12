@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QLCDNumber>
 #include <QGroupBox>
+#include <QFrame>
+#include <QWidget>
 
 class NodeDetail : public QWidget
 {
@@ -24,6 +26,8 @@ private:
     QLCDNumber *m_input_v_lcd;
     QLCDNumber *m_output_i_lcd;
     QLCDNumber *m_output_v_lcd;
+
+    QLabel *m_description;
 };
 
 #endif // NODEDETAIL_H
