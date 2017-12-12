@@ -1,0 +1,12 @@
+QGroupBox{
+    border: 2px solid #0000EE;
+    border-radius: 5px;
+    margin-top: 1ex;
+    font:blod 14px;
+}
+
+QGroupBox#title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 0 3px;
+}

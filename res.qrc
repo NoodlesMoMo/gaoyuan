@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/ok.jpg</file>
+        <file>res/skin.qss</file>
+    </qresource>
+</RCC>
