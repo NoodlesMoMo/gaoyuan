@@ -50,6 +50,12 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     line->setFrameShadow(QFrame::Sunken);
 
     m_description = new QLabel("TODO: add description here ...");
+    QFont font;
+    font.setPointSize(16);
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, Qt::black);
+    m_description->setPalette(palette);
+    m_description->setFont(font);
     QVBoxLayout *desc_layout = new QVBoxLayout(desc_widget);
     desc_layout->addWidget(m_description);
 
@@ -59,6 +65,6 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 
 void NodeDetail::setText(const QString &text)
 {
-
+    m_description->setText(text);
 }
 
