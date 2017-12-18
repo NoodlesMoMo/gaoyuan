@@ -7,16 +7,25 @@ TARGET =
 DEPENDPATH += .
 INCLUDEPATH += .
 
+QT += network
+
 # Input
 SOURCES += main.cpp \
     mainpanal.cpp \
     devicebutton.cpp \
-    nodedetail.cpp
+    nodedetail.cpp \
+    work_thread.cpp \
+    mainwindow.cpp \
+    devnodesetting.cpp
 
 HEADERS += \
     mainpanal.h \
     devicebutton.h \
-    nodedetail.h
+    nodedetail.h \
+    work_thread.h \
+    mainwindow.h \
+    devnodesetting.h \
+    gydata.h
 
 RESOURCES += \
     res.qrc

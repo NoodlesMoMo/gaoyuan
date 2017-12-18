@@ -1,5 +1,5 @@
 #include <QtGui>
-#include "mainpanal.h"
+#include "mainwindow.h"
 
 int main(int argc, char** argv)
 {
@@ -12,13 +12,9 @@ int main(int argc, char** argv)
         skin.close();
     }
 
-    QMainWindow win;
-
-    MainPanal *centralWidget = new MainPanal;
-
-    win.setCentralWidget(centralWidget);
-    win.setWindowTitle(QString::fromUtf8("高源电气"));
+    MainWindow win;
     win.showMaximized();
+//    win.show();
 
     return app.exec();
 }
