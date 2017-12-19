@@ -151,6 +151,7 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 {
     switch (socketError) {
     case QAbstractSocket::RemoteHostClosedError:
+        setStatus(DISCONNECT);
         m_detail->errorLog(id(), "lost connection...");
         break;
     case QAbstractSocket::HostNotFoundError:
