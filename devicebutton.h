@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QAction>
 #include <QTimer>
+#include <QTime>
 #include <QContextMenuEvent>
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QHostAddress>
@@ -19,6 +20,7 @@
 const QString ok_style_sheet = QString("QLabel{border-image: url(:/res/green.png)}");
 const QString fault_style_sheet = QString("QLabel{border-image: url(:/res/red.png)}");
 const QString disconnect_style_sheet = QString("QLabel{border-image: url(:/res/yellow.png)}");
+const QString timeout_style_sheet = QString("QLabel{border-image: url(:/res/blue.png)}");
 
 const char modbus_command[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x06,
@@ -30,7 +32,7 @@ class DeviceButton : public QPushButton
     Q_OBJECT
 
 public:
-    enum DeviceStatus{OK, FAULT, DISCONNECT};
+    enum DeviceStatus{OK, DISCONN_ERR, TIMEOUT_ERR, FAULT};
 
 public:
     DeviceButton(NodeDetail* detail, NodeSetting);
@@ -65,6 +67,7 @@ private:
     QLabel* m_address;
     QLabel* m_description;
     QLabel* m_status;
+    QLabel* m_hint;
 
     QTcpSocket *m_socket;
 
@@ -73,6 +76,7 @@ private:
     QAction *m_reconnectAction;
 
     QTimer *m_timer;
+    QTime m_lastet_recv;
 };
 
 #endif // DEVICEBUTTON_H

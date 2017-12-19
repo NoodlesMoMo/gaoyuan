@@ -36,6 +36,9 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     input_v_lbl->setStyleSheet(GYLabelStyleSheet);
     output_i_lbl->setStyleSheet(GYLabelStyleSheet);
     output_v_lbl->setStyleSheet(GYLabelStyleSheet);
+    input_v_lbl->setFixedWidth(260);
+    output_i_lbl->setFixedWidth(260);
+    output_v_lbl->setFixedWidth(260);
 
     input_v_lbl->setAlignment(Qt::AlignCenter);
     output_i_lbl->setAlignment(Qt::AlignCenter);

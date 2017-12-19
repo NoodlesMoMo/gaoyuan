@@ -23,12 +23,14 @@ void DeviceButton::setStatus(DeviceStatus status)
         m_status->setStyleSheet(ok_style_sheet);
         break;
 
+    case DISCONN_ERR:
+        m_status->setStyleSheet(disconnect_style_sheet);
+
+    case TIMEOUT_ERR:
+        m_status->setStyleSheet(timeout_style_sheet);
+
     case FAULT:
         m_status->setStyleSheet(fault_style_sheet);
-        break;
-
-    case DISCONNECT:
-        m_status->setStyleSheet(disconnect_style_sheet);
         break;
     }
 }
@@ -51,11 +53,14 @@ void DeviceButton::init()
     m_address = new QLabel;
     m_description = new QLabel;
     m_status = new QLabel;
+    m_hint = new QLabel;
 
     m_status->setFixedSize(32, 32);
     m_address->setStyleSheet("QLabel{font-size:16px; color:white;}");
+    m_hint->setStyleSheet("QLabel{font-size: 14px; color: white;}");
 
     layout->addWidget(m_address, 0, 0, 1, 2);
+    layout->addWidget(m_hint, 2, 1, 1, 3);
     layout->addWidget(m_status, 2, 4, 1, 1);
     layout->addWidget(m_description, 3, 0, 1, 2);
 
@@ -67,7 +72,6 @@ void DeviceButton::init()
     setStyleSheet("QPushButton#dev-btn{border-image: url(:/res/panel.png)}");
 
     m_socket = new QTcpSocket(this);
-    qDebug() << m_setting.ip << ", " << m_setting.port.toUShort();
     m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
 
     connect(m_socket, SIGNAL(connected()), this, SLOT(onConnected()));
@@ -76,7 +80,8 @@ void DeviceButton::init()
             this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 
     setFixedSize(180, 120);
-    setStatus(DISCONNECT);
+    setStatus(DISCONN_ERR);
+    m_hint->setText(QString::fromUtf8("<font color=yellow>未链接</font>"));
 
     m_reconnectAction = new QAction(QString::fromUtf8("重连"),this);
     connect(m_reconnectAction, SIGNAL(triggered(bool)), this, SLOT(onReconnAction()));
@@ -88,6 +93,8 @@ void DeviceButton::init()
 
 void DeviceButton::mouseDoubleClickEvent(QMouseEvent *e)
 {
+    Q_UNUSED(e);
+
     QMessageBox::about(this, "ID", this->id());
 }
 
@@ -108,20 +115,33 @@ void DeviceButton::onConnected()
     m_timer->start();
 
     setStatus(OK);
+    m_hint->setText(QString::fromUtf8("<font color=green>连接建立</font>"));
 }
 
 void DeviceButton::onTimeout()
 {
     int n = m_socket->write(modbus_command, sizeof(modbus_command));
-    qDebug() << "send " << n << " byte.";
+    if(n < 0){
+        m_detail->errorLog(id(), QString("send error"));
+    }
+
+    if(QTime::currentTime().second() - m_lastet_recv.second() > 15){
+        setStatus(TIMEOUT_ERR);
+        m_hint->setText(QString::fromUtf8("<font color=red>上报超时</font>"));
+        m_detail->errorLog(id(), "report timeout.");
+    }
 }
 
 void DeviceButton::onReadData()
 {
+    m_lastet_recv = QTime::currentTime();
+
     unsigned char data[128];
     memset(data, 0, sizeof(data));
     int n = m_socket->read((char*)data, sizeof(data));
     if(n < 41){
+        setStatus(FAULT);
+        m_hint->setText(QString::fromUtf8("<font color=red>数据错误</font>"));
         m_detail->errorLog(id(), QString("read %1 bytes, less 41 bytes.").arg(n));
         return;
     }
@@ -133,7 +153,10 @@ void DeviceButton::onReadData()
         hexdata += QString(hex);
     }
     hexdata += QString("\n");
-    m_detail->errorLog(id(), hexdata);
+
+    qDebug() << id() << hexdata;
+
+//    m_detail->errorLog(id(), hexdata);
 
     GYData gy_data;
     gy_data.ac_v = ((unsigned int)data[9])*256 + (unsigned int)data[10];
@@ -141,6 +164,15 @@ void DeviceButton::onReadData()
     gy_data.dc_i = float(((unsigned int)data[25])*256 + (unsigned int)data[26]) / 10.0;
     gy_data.faultBit1 = ((unsigned int)data[37])*256 + (unsigned int)data[38];
     gy_data.faultBit2 = ((unsigned int)data[39])*256 + (unsigned int)data[40];
+
+    if(gy_data.faultBit1 + gy_data.faultBit2 != 0){
+        setStatus(FAULT);
+        m_hint->setText(QString::fromUtf8("<font color=red>设备故障</font>"));
+        m_detail->errorLog(id(), QString("%1:%2").arg(gy_data.faultBit1, gy_data.faultBit2));
+    }else{
+        setStatus(OK);
+        m_hint->setText(QString("<font color=green>%1/%2/%2</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
+    }
 
     if(this->hasFocus()){
         m_detail->showGYData(this->id(), gy_data);
@@ -151,14 +183,12 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 {
     switch (socketError) {
     case QAbstractSocket::RemoteHostClosedError:
-        setStatus(DISCONNECT);
         m_detail->errorLog(id(), "lost connection...");
         break;
     case QAbstractSocket::HostNotFoundError:
         QMessageBox::information(this, tr("Network error"),
                                  tr("The host was not found. Please check the "
                                     "host name and port settings."));
-        setStatus(DISCONNECT);
         break;
     case QAbstractSocket::ConnectionRefusedError:
         QMessageBox::information(this, tr("Network error"),
@@ -166,14 +196,16 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
                                     "Make sure the fortune server is running, "
                                     "and check that the host name and port "
                                     "settings are correct."));
-        setStatus(DISCONNECT);
         break;
     default:
-        setStatus(DISCONNECT);
         QMessageBox::information(this, tr("Network error"),
                                  tr("The following error occurred: %1.")
                                  .arg(m_socket->errorString()));
     }
+
+    setStatus(DISCONN_ERR);
+    m_hint->setText(QString::fromUtf8("<font color=red>通信错误</font>"));
+    m_detail->errorLog(id(), m_socket->errorString());
 }
 
 void DeviceButton::onReconnAction()

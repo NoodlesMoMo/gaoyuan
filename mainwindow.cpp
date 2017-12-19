@@ -16,8 +16,8 @@ MainWindow::MainWindow(): m_setting_dlg(NULL)
 
 void MainWindow::createToolBar()
 {
-    m_addDevAction = new QAction(QString::fromUtf8("添加"), this);
-    m_delDevAction = new QAction(QString::fromUtf8("删除"), this);
+    m_addDevAction = new QAction(QIcon(":/res/add.png"), QString::fromUtf8("添加"), this);
+    m_delDevAction = new QAction(QIcon(":/res/del.png"), QString::fromUtf8("删除"), this);
 
     connect(m_addDevAction, SIGNAL(triggered(bool)), this, SLOT(onAddAction()));
     connect(m_delDevAction, SIGNAL(triggered(bool)), this, SLOT(onDelAction()));

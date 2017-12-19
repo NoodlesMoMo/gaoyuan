@@ -6,5 +6,7 @@
         <file>res/red.png</file>
         <file>res/yellow.png</file>
         <file>res/blue.png</file>
+        <file>res/add.png</file>
+        <file>res/del.png</file>
     </qresource>
 </RCC>

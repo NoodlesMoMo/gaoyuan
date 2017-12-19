@@ -33,14 +33,12 @@ void MainPanal::init()
     scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scroll_area->setWidgetResizable(true);
 
-    m_tab_detail = new QTabWidget;
-    m_detail = new NodeDetail(m_tab_detail);
-    m_tab_detail->addTab(m_detail, "detail");
-    m_tab_detail->setMaximumWidth(500);
+    m_detail = new NodeDetail;
+    m_detail->setMaximumWidth(500);
     m_gridLayout = new QGridLayout(m_device_panel);
 
     addWidget(scroll_area);
-    addWidget(m_tab_detail);
+    addWidget(m_detail);
 }
 
 MainPanal::~MainPanal()
