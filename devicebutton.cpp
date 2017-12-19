@@ -127,9 +127,9 @@ void DeviceButton::onReadData()
     }
 
     QString hexdata;
-    char hex[3] = {0,0,0};
+    char hex[4] = {0,0,0,0};
     for(int i=0; i<n; i++){
-        sprintf(hex, " %02X ", data[i]);
+        sprintf(hex, "%02X ", data[i]);
         hexdata += QString(hex);
     }
     hexdata += QString("\n");
