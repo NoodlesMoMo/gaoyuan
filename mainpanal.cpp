@@ -8,6 +8,9 @@
 #include <QSettings>
 #include <QDebug>
 
+const QString OrgName("gaoyuan.org");
+const QString AppName("gy_monitor");
+
 MainPanal::MainPanal()
 {
     init();
@@ -92,7 +95,7 @@ void MainPanal::delDeviceNode(const QString& id)
 
 void MainPanal::save()
 {
-    QSettings settings("./.gy_minitor.conf",QSettings::NativeFormat);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, OrgName, AppName, this);
     settings.beginWriteArray("deviceNodes");
     QMap<QString, DeviceButton*>::iterator iter = m_dev_nodes.begin();
     int index = 0;
@@ -107,7 +110,7 @@ void MainPanal::save()
 
 void MainPanal::load()
 {
-    QSettings setting("./.gy_minitor.conf", QSettings::NativeFormat);
+    QSettings setting(QSettings::IniFormat, QSettings::UserScope, OrgName, AppName, this);
     int size=setting.beginReadArray("deviceNodes");
 
     for(int i=0; i<size; i++){
