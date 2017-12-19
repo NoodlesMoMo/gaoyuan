@@ -72,14 +72,13 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     output_v_layout->addWidget(m_output_v_lcd);
 
     QVBoxLayout *vbox = new QVBoxLayout;
-    vbox->addLayout(status_layout);
+    //vbox->addLayout(status_layout);
     vbox->addLayout(input_i_layout);
     vbox->addLayout(input_v_layout);
     vbox->addLayout(output_i_layout);
     vbox->addLayout(output_v_layout);
     groupBox->setLayout(vbox);
     groupBox->setMinimumHeight(300);
-    layout->addWidget(groupBox);
 
     QWidget *desc_widget = new QWidget;
     QFrame *line = new QFrame;
@@ -92,6 +91,8 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     QVBoxLayout *desc_layout = new QVBoxLayout(desc_widget);
     desc_layout->addWidget(m_descEdit);
 
+    layout->addLayout(status_layout);
+    layout->addWidget(groupBox);
     layout->addWidget(line);
     layout->addWidget(desc_widget);
 }
@@ -108,6 +109,8 @@ void NodeDetail::showGYData(const QString& id, const GYData &data) const
     m_input_v_lcd->display(data.dc_v);
 
     if(data.faultBit == 0){
-        m_status_label->setText("ok");
+        m_status_label->setText(QString::fromUtf8("正常"));
+    }else{
+        m_status_label->setText(QString::fromUtf8("故障"));
     }
 }
