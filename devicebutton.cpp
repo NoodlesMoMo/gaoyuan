@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QMenu>
+#include <stdio.h>
 #include <QDebug>
 
 DeviceButton::DeviceButton(NodeDetail* detail, NodeSetting setting):
@@ -120,19 +121,26 @@ void DeviceButton::onReadData()
     unsigned char data[128];
     memset(data, 0, sizeof(data));
     int n = m_socket->read((char*)data, sizeof(data));
-    qDebug() << "read " << n << " bytes.";
-
-    m_detail->errorLog(id(), QString("read %1 bytes").arg(n));
-    if(n < 20){
-        qDebug() << "Invalid data: less 20 bytes";
+    if(n < 41){
+        m_detail->errorLog(id(), QString("read %1 bytes, less 41 bytes.").arg(n));
         return;
     }
 
+    QString hexdata;
+    char hex[3] = {0,0,0};
+    for(int i=0; i<n; i++){
+        sprintf(hex, " %02X ", data[i]);
+        hexdata += QString(hex);
+    }
+    hexdata += QString("\n");
+    m_detail->errorLog(id(), hexdata);
+
     GYData gy_data;
     gy_data.ac_v = ((unsigned int)data[9])*256 + (unsigned int)data[10];
-    gy_data.dc_v = float(((unsigned int)data[17])*256 + (unsigned int)data[18]) / 10.0;
-    gy_data.dc_i = float(((unsigned int)data[23])*256 + (unsigned int)data[24]) / 10.0;
-    gy_data.faultBit = ((unsigned int)data[37])*256 + (unsigned int)data[38];
+    gy_data.dc_v = float(((unsigned int)data[15])*256 + (unsigned int)data[16]) / 10.0;
+    gy_data.dc_i = float(((unsigned int)data[25])*256 + (unsigned int)data[26]) / 10.0;
+    gy_data.faultBit1 = ((unsigned int)data[37])*256 + (unsigned int)data[38];
+    gy_data.faultBit2 = ((unsigned int)data[39])*256 + (unsigned int)data[40];
 
     if(this->hasFocus()){
         m_detail->showGYData(this->id(), gy_data);

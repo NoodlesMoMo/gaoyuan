@@ -22,9 +22,9 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 
     QGroupBox *groupBox = new QGroupBox(tr(""));
 
-    QLabel *input_v_lbl = new QLabel(QString::fromUtf8("输入电压 (V AC)"));
-    QLabel *output_i_lbl = new QLabel(QString::fromUtf8("输出电流 ( A )"));
-    QLabel *output_v_lbl = new QLabel(QString::fromUtf8("输出电压 (V DC)"));
+    QLabel *input_v_lbl = new QLabel(QString::fromUtf8("直流母线电压(V DC)"));
+    QLabel *output_i_lbl = new QLabel(QString::fromUtf8("负载输出电流(A)"));
+    QLabel *output_v_lbl = new QLabel(QString::fromUtf8("逆变输出电压(V AC)"));
 
     m_id_label = new QLabel;
     m_status_label = new QLabel;
@@ -108,7 +108,7 @@ void NodeDetail::showGYData(const QString& id, const GYData &data) const
     m_output_i_lcd->display(data.dc_i);
     m_input_v_lcd->display(data.dc_v);
 
-    if(data.faultBit == 0){
+    if(data.faultBit1+data.faultBit2 == 0){
         m_status_label->setText(QString::fromUtf8("正常"));
     }else{
         m_status_label->setText(QString::fromUtf8("故障"));
