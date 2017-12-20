@@ -20,7 +20,7 @@ DevNodeSetting::DevNodeSetting(QWidget* parent)
     m_port = new QLineEdit;
     m_description = new QLineEdit;
 
-    m_port->setText("8080");
+    m_port->setText("26");
 
     ip_lbl->setBuddy(m_ip);
     port_lbl->setBuddy(m_port);
