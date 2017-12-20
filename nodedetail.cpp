@@ -111,9 +111,13 @@ void NodeDetail::showGYData(const QString& id, const GYData &data) const
     m_output_i_lcd->display(data.dc_i);
     m_input_v_lcd->display(data.dc_v);
 
-    if(data.faultBit1+data.faultBit2 == 0){
-        m_status_label->setText(QString::fromUtf8("正常"));
+    if(data.ac_v < 200 || data.ac_v > 230){
+        m_status_label->setText(QString::fromUtf8("<font color=red>故障</font>"));
     }else{
-        m_status_label->setText(QString::fromUtf8("故障"));
+        if(data.warnBit+data.faultBit == 0){
+            m_status_label->setText(QString::fromUtf8("<font color=geen>正常</font>"));
+        }else{
+            m_status_label->setText(QString::fromUtf8("<font color=yellow>告警</font>"));
+        }
     }
 }

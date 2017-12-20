@@ -29,6 +29,9 @@ void DeviceButton::setStatus(DeviceStatus status)
     case TIMEOUT_ERR:
         m_status->setStyleSheet(timeout_style_sheet);
 
+    case WARN:
+        m_status->setStyleSheet(warn_style_sheet);
+
     case FAULT:
         m_status->setStyleSheet(fault_style_sheet);
         break;
@@ -162,16 +165,26 @@ void DeviceButton::onReadData()
     gy_data.ac_v = ((unsigned int)data[9])*256 + (unsigned int)data[10];
     gy_data.dc_v = float(((unsigned int)data[15])*256 + (unsigned int)data[16]) / 10.0;
     gy_data.dc_i = float(((unsigned int)data[25])*256 + (unsigned int)data[26]) / 10.0;
-    gy_data.faultBit1 = ((unsigned int)data[37])*256 + (unsigned int)data[38];
-    gy_data.faultBit2 = ((unsigned int)data[39])*256 + (unsigned int)data[40];
+    gy_data.faultBit = ((unsigned int)data[37])*256 + (unsigned int)data[38];
+    gy_data.warnBit = ((unsigned int)data[39])*256 + (unsigned int)data[40];
 
-    if(gy_data.faultBit1 + gy_data.faultBit2 != 0){
+    bool ok = true;
+    if(gy_data.ac_v < 200 || gy_data.ac_v > 230){
+        ok = false;
         setStatus(FAULT);
         m_hint->setText(QString::fromUtf8("<font color=red>设备故障</font>"));
-        m_detail->errorLog(id(), QString("%1:%2").arg(gy_data.faultBit1, gy_data.faultBit2));
-    }else{
-        setStatus(OK);
-        m_hint->setText(QString("<font color=green>%1/%2/%2</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
+    }
+
+    if(ok){
+        if(gy_data.warnBit + gy_data.faultBit != 0){
+            setStatus(WARN);
+            m_hint->setText(QString::fromUtf8("<font color=red>设备告警</font>"));
+            m_detail->errorLog(id(), QString("warn code: [%1 %2]").arg(QString::number(gy_data.warnBit, 16),
+                                                                       QString::number(gy_data.faultBit, 16)));
+        }else{
+            setStatus(OK);
+            m_hint->setText(QString("<font color=green>%1/%2/%3</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
+        }
     }
 
     if(this->hasFocus()){

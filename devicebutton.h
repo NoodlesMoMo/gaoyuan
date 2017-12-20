@@ -20,6 +20,7 @@
 const QString ok_style_sheet = QString("QLabel{border-image: url(:/res/green.png)}");
 const QString fault_style_sheet = QString("QLabel{border-image: url(:/res/red.png)}");
 const QString disconnect_style_sheet = QString("QLabel{border-image: url(:/res/yellow.png)}");
+const QString warn_style_sheet = QString("QLabel{border-image: url(:/res/yellow.png)}");
 const QString timeout_style_sheet = QString("QLabel{border-image: url(:/res/blue.png)}");
 
 const char modbus_command[] = {
@@ -32,7 +33,7 @@ class DeviceButton : public QPushButton
     Q_OBJECT
 
 public:
-    enum DeviceStatus{OK, DISCONN_ERR, TIMEOUT_ERR, FAULT};
+    enum DeviceStatus{OK, DISCONN_ERR, TIMEOUT_ERR, WARN, FAULT};
 
 public:
     DeviceButton(NodeDetail* detail, NodeSetting);
