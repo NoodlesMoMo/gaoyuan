@@ -1,6 +1,8 @@
 #include "nodedetail.h"
 #include <QHBoxLayout>
 #include <QRadioButton>
+#include <QScrollBar>
+#include <QTime>
 
 const QString ErrorLogStyleSheet = "QTextEdit {" \
                                    "border: 1px solid rgb(45, 45, 45);"\
@@ -94,6 +96,8 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     QVBoxLayout *desc_layout = new QVBoxLayout(desc_widget);
     desc_layout->addWidget(m_descEdit);
 
+    connect(m_descEdit, SIGNAL(textChanged()), this, SLOT(onTextEdit()));
+
     layout->addLayout(status_layout);
     layout->addWidget(groupBox);
     layout->addWidget(line);
@@ -101,7 +105,13 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 }
 
 void NodeDetail::errorLog(const QString id, const QString& log){
-    m_descEdit->append(QString("<b>%1<b> <i>%2</i>").arg(id, log));
+    m_descEdit->append(QString("[%1] [%2] %3").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"),
+                                                   id, log));
+}
+
+void NodeDetail::onTextEdit()
+{
+    m_descEdit->verticalScrollBar()->setValue(m_descEdit->verticalScrollBar()->maximum());
 }
 
 void NodeDetail::showGYData(const QString& id, const GYData &data) const
@@ -111,13 +121,11 @@ void NodeDetail::showGYData(const QString& id, const GYData &data) const
     m_output_i_lcd->display(data.dc_i);
     m_input_v_lcd->display(data.dc_v);
 
-    if(data.ac_v < 200 || data.ac_v > 230){
+    if(data.isFault()){
         m_status_label->setText(QString::fromUtf8("<font color=red>故障</font>"));
+    }else if(data.isWarn()){
+        m_status_label->setText(QString::fromUtf8("<font color=yellow>告警</font>"));
     }else{
-        if(data.warnBit+data.faultBit == 0){
-            m_status_label->setText(QString::fromUtf8("<font color=geen>正常</font>"));
-        }else{
-            m_status_label->setText(QString::fromUtf8("<font color=yellow>告警</font>"));
-        }
+        m_status_label->setText(QString::fromUtf8("<font color=geen>正常</font>"));
     }
 }

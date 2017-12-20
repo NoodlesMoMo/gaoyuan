@@ -165,26 +165,23 @@ void DeviceButton::onReadData()
     gy_data.ac_v = ((unsigned int)data[9])*256 + (unsigned int)data[10];
     gy_data.dc_v = float(((unsigned int)data[15])*256 + (unsigned int)data[16]) / 10.0;
     gy_data.dc_i = float(((unsigned int)data[25])*256 + (unsigned int)data[26]) / 10.0;
+    gy_data.t = float(((unsigned int)data[31])*256 + (unsigned int)data[32]) / 10.0;
     gy_data.faultBit = ((unsigned int)data[37])*256 + (unsigned int)data[38];
     gy_data.warnBit = ((unsigned int)data[39])*256 + (unsigned int)data[40];
 
-    bool ok = true;
-    if(gy_data.ac_v < 200 || gy_data.ac_v > 230){
-        ok = false;
+    if(gy_data.isFault()){
         setStatus(FAULT);
         m_hint->setText(QString::fromUtf8("<font color=red>设备故障</font>"));
-    }
-
-    if(ok){
-        if(gy_data.warnBit + gy_data.faultBit != 0){
-            setStatus(WARN);
-            m_hint->setText(QString::fromUtf8("<font color=red>设备告警</font>"));
-            m_detail->errorLog(id(), QString("warn code: [%1 %2]").arg(QString::number(gy_data.warnBit, 16),
-                                                                       QString::number(gy_data.faultBit, 16)));
-        }else{
-            setStatus(OK);
-            m_hint->setText(QString("<font color=green>%1/%2/%3</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
-        }
+        m_detail->errorLog(id(), QString("[FAULT] AC_V: %1, DC_V: %2, DC_I: %3").arg(QString::number(gy_data.ac_v)));
+    }else if(gy_data.isWarn()){
+        setStatus(WARN);
+        m_hint->setText(QString::fromUtf8("<font color=yellow>设备告警</font>"));
+        m_detail->errorLog(id(), QString("[WARN] DC_V: %1, DC_I: %2, T: %3").arg(QString::number(gy_data.dc_v),
+                                                                                 QString::number(gy_data.dc_i),
+                                                                                 QString::number(gy_data.t)));
+    }else{
+        setStatus(OK);
+        m_hint->setText(QString("<font color=green>%1/%2/%3</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
     }
 
     if(this->hasFocus()){
@@ -196,7 +193,7 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 {
     switch (socketError) {
     case QAbstractSocket::RemoteHostClosedError:
-        m_detail->errorLog(id(), "lost connection...");
+        m_detail->errorLog(id(), "[CONN] lost connection...");
         break;
     case QAbstractSocket::HostNotFoundError:
         QMessageBox::information(this, tr("Network error"),
@@ -218,13 +215,14 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 
     setStatus(DISCONN_ERR);
     m_hint->setText(QString::fromUtf8("<font color=red>通信错误</font>"));
-    m_detail->errorLog(id(), m_socket->errorString());
+    m_detail->errorLog(id(), QString("[CONN] %1").arg(m_socket->errorString()));
 }
 
 void DeviceButton::onReconnAction()
 {
     m_socket->abort();
     m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
+    m_detail->errorLog(id(), QString("[WARN] reconnect manual."));
 }
 
 

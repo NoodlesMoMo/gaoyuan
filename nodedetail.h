@@ -25,6 +25,7 @@ public:
 signals:
 
 public slots:
+    void onTextEdit();
 
 private:
     QLCDNumber *m_input_v_lcd;
