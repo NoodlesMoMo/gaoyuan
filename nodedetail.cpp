@@ -3,6 +3,7 @@
 #include <QRadioButton>
 #include <QScrollBar>
 #include <QTime>
+#include "gylogger.h"
 
 const QString ErrorLogStyleSheet = "QTextEdit {" \
                                    "border: 1px solid rgb(45, 45, 45);"\
@@ -10,7 +11,7 @@ const QString ErrorLogStyleSheet = "QTextEdit {" \
                                    "font-size: 16px;" \
                                    "background: rgb(57, 58, 60);}";
 
-const QString GYLabelStyleSheet = "QLabel{font-size: 26px;}";
+const QString GYLabelStyleSheet = "QLabel{font-size: 22px;}";
 
 const QString LCDStyleSheet = "QLCDNumber{border: 1px solid rgb(45, 45, 45);"\
         "border-radius: 4px;" \
@@ -24,6 +25,7 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 
     QGroupBox *groupBox = new QGroupBox(tr(""));
 
+    QLabel *temp_lbl = new QLabel(QString::fromUtf8("温度(C)"));
     QLabel *input_v_lbl = new QLabel(QString::fromUtf8("直流母线电压(V DC)"));
     QLabel *output_i_lbl = new QLabel(QString::fromUtf8("负载输出电流(A)"));
     QLabel *output_v_lbl = new QLabel(QString::fromUtf8("逆变输出电压(V AC)"));
@@ -35,30 +37,37 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
     m_status_label->setStyleSheet("QLabel{font-size: 16px;}");
     m_id_label->setScaledContents(true);
     m_status_label->setScaledContents(true);
+    temp_lbl->setStyleSheet(GYLabelStyleSheet);
     input_v_lbl->setStyleSheet(GYLabelStyleSheet);
     output_i_lbl->setStyleSheet(GYLabelStyleSheet);
     output_v_lbl->setStyleSheet(GYLabelStyleSheet);
+    temp_lbl->setFixedWidth(260);
     input_v_lbl->setFixedWidth(260);
     output_i_lbl->setFixedWidth(260);
     output_v_lbl->setFixedWidth(260);
 
+    temp_lbl->setAlignment(Qt::AlignCenter);
     input_v_lbl->setAlignment(Qt::AlignCenter);
     output_i_lbl->setAlignment(Qt::AlignCenter);
     output_v_lbl->setAlignment(Qt::AlignCenter);
     m_id_label->setAlignment(Qt::AlignCenter);
 
+    m_temp_lcd = new QLCDNumber(6);
     m_input_v_lcd = new QLCDNumber(6);
     m_output_i_lcd = new QLCDNumber(6);
     m_output_v_lcd = new QLCDNumber(6);
 
+    m_temp_lcd->setSegmentStyle(QLCDNumber::Flat);
     m_input_v_lcd->setSegmentStyle(QLCDNumber::Flat);
     m_output_i_lcd->setSegmentStyle(QLCDNumber::Flat);
     m_output_v_lcd->setSegmentStyle(QLCDNumber::Flat);
+    m_temp_lcd->setStyleSheet(LCDStyleSheet);
     m_input_v_lcd->setStyleSheet(LCDStyleSheet);
     m_output_i_lcd->setStyleSheet(LCDStyleSheet);
     m_output_v_lcd->setStyleSheet(LCDStyleSheet);
 
     QHBoxLayout *status_layout = new QHBoxLayout;
+    QHBoxLayout *temp_layout = new QHBoxLayout;
     QHBoxLayout *input_i_layout = new QHBoxLayout;
     QHBoxLayout *input_v_layout = new QHBoxLayout;
     QHBoxLayout *output_i_layout = new QHBoxLayout;
@@ -66,6 +75,9 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 
     status_layout->addWidget(m_id_label);
     status_layout->addWidget(m_status_label);
+
+    temp_layout->addWidget(temp_lbl);
+    temp_layout->addWidget(m_temp_lcd);
 
     input_v_layout->addWidget(input_v_lbl);
     input_v_layout->addWidget(m_input_v_lcd);
@@ -78,6 +90,7 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout *vbox = new QVBoxLayout;
     //vbox->addLayout(status_layout);
+    vbox->addLayout(temp_layout);
     vbox->addLayout(input_i_layout);
     vbox->addLayout(input_v_layout);
     vbox->addLayout(output_i_layout);
@@ -105,8 +118,13 @@ NodeDetail::NodeDetail(QWidget *parent) : QWidget(parent)
 }
 
 void NodeDetail::errorLog(const QString id, const QString& log){
-    m_descEdit->append(QString("[%1] [%2] %3").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"),
-                                                   id, log));
+    QString line = QString("[%1] [%2] %3").arg(
+                QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"),
+                id, log);
+
+    m_descEdit->append(line);
+
+    writeLog(line);
 }
 
 void NodeDetail::onTextEdit()
@@ -117,6 +135,7 @@ void NodeDetail::onTextEdit()
 void NodeDetail::showGYData(const QString& id, const GYData &data) const
 {
     m_id_label->setText(id);
+    m_temp_lcd->display(data.t);
     m_output_v_lcd->display(data.ac_v);
     m_output_i_lcd->display(data.dc_i);
     m_input_v_lcd->display(data.dc_v);

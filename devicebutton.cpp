@@ -46,7 +46,7 @@ QSize DeviceButton::sizeHint() const{
 
 void DeviceButton::onclick()
 {
-    //m_detail->setText(this->text());
+    m_detail->showGYData(QString("%1 %2").arg(id(), description()), GYData());
 }
 
 void DeviceButton::init()
@@ -181,11 +181,14 @@ void DeviceButton::onReadData()
                                                                                  QString::number(gy_data.t)));
     }else{
         setStatus(OK);
-        m_hint->setText(QString("<font color=green>%1/%2/%3</font>").arg(gy_data.ac_v,gy_data.dc_v,gy_data.dc_i));
+        m_hint->setText(QString("<font color=green>%1/%2/%3</font>").arg(
+                            QString::number(gy_data.ac_v),
+                            QString::number(gy_data.dc_v),
+                            QString::number(gy_data.dc_i)));
     }
 
     if(this->hasFocus()){
-        m_detail->showGYData(this->id(), gy_data);
+        m_detail->showGYData(QString("%1 %2").arg(id(), description()), gy_data);
     }
 }
 

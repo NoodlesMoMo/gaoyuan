@@ -1,5 +1,6 @@
 #include <QtGui>
 #include "mainwindow.h"
+#include "gylogger.h"
 
 int main(int argc, char** argv)
 {
@@ -15,9 +16,11 @@ int main(int argc, char** argv)
         skin.close();
     }
 
+    openLog();
     MainWindow win;
     win.showMaximized();
-//    win.show();
+    int ret = app.exec();
+    closeLog();
 
-    return app.exec();
+    return ret;
 }

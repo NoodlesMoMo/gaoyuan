@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     nodedetail.cpp \
     work_thread.cpp \
     mainwindow.cpp \
-    devnodesetting.cpp
+    devnodesetting.cpp \
+    gylogger.cpp
 
 HEADERS += \
     mainpanal.h \
@@ -25,7 +26,8 @@ HEADERS += \
     work_thread.h \
     mainwindow.h \
     devnodesetting.h \
-    gydata.h
+    gydata.h \
+    gylogger.h
 
 RESOURCES += \
     res.qrc

@@ -28,6 +28,7 @@ public slots:
     void onTextEdit();
 
 private:
+    QLCDNumber *m_temp_lcd;
     QLCDNumber *m_input_v_lcd;
     QLCDNumber *m_output_i_lcd;
     QLCDNumber *m_output_v_lcd;
