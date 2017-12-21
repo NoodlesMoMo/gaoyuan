@@ -2,6 +2,7 @@
 #include <QDateTime>
 #include <QFile>
 #include <QMutex>
+#include <QDir>
 #include <QTextStream>
 
 QFile *_gyLog;
@@ -10,8 +11,14 @@ QTextStream *_textStream;
 
 void openLog()
 {
-    QString fileName = QString("gaoyuan_%1.log").arg(QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss"));
-    _gyLog = new QFile(fileName);
+    QDir dir;
+    QString path = QDir::currentPath() + QDir::separator() + "log";
+    if(!dir.exists(path)){
+        dir.mkdir(path);
+    }
+
+    QString fileName = QString("gaoyuan_%1.log").arg(QDateTime::currentDateTime().toString("yyyyMMddhhmmss"));
+    _gyLog = new QFile(path + QDir::separator() +fileName);
     _gyLog->open(QIODevice::WriteOnly|QIODevice::Append);
     _mutex = new QMutex;
 }
@@ -29,7 +36,6 @@ void writeLog(QString& log)
 void closeLog()
 {
     _gyLog->close();
-
     delete _gyLog;
     delete _mutex;
 }
