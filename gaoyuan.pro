@@ -32,4 +32,4 @@ HEADERS += \
 RESOURCES += \
     res.qrc
 
-RC_ICONS=eye.ico
+RC_FILE = app.rc

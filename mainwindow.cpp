@@ -12,6 +12,7 @@ MainWindow::MainWindow(): m_setting_dlg(NULL)
     createToolBar();
 
     setWindowTitle(QString::fromUtf8("高源电气"));
+    setWindowIcon(QIcon(":/res/logo.png"));
 }
 
 void MainWindow::createToolBar()
