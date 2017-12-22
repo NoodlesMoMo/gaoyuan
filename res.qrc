@@ -8,5 +8,6 @@
         <file>res/blue.png</file>
         <file>res/add.png</file>
         <file>res/del.png</file>
+        <file>res/logo.png</file>
     </qresource>
 </RCC>

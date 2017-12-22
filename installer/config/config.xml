@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>GaoYuan Monitor</Name>
+    <Version>1.0.0</Version>
+    <Title>GaoYuan Monitor</Title>
+    <Publisher>www.gaoyuan.com</Publisher>
+    <StartMenuDir>gaoyuan</StartMenuDir>
+    <TargetDir>@HomeDir@/gy_monitor</TargetDir>
+</Installer>

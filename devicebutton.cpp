@@ -223,6 +223,10 @@ void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 
 void DeviceButton::onReconnAction()
 {
+    if(!m_timer->isActive()){
+        m_timer->start(1000);
+    }
+
     m_socket->abort();
     m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
     m_detail->errorLog(id(), QString("[WARN] reconnect manual."));

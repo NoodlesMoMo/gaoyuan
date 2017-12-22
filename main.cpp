@@ -8,6 +8,7 @@ int main(int argc, char** argv)
 
     QFont font(QString::fromUtf8("微软雅黑"));
     qApp->setFont(font);
+    qApp->setWindowIcon(QIcon(":/res/logo.png"));
 
     QFile skin(":/res/skin.qss");
     skin.open(QFile::ReadOnly);
