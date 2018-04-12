@@ -79,6 +79,7 @@ void DeviceButton::init()
 
     connect(m_socket, SIGNAL(connected()), this, SLOT(onConnected()));
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(onReadData()));
+    connect(m_socket, SIGNAL(disconnected()), this, SLOT(onDissconnect()));
     connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 
@@ -123,15 +124,20 @@ void DeviceButton::onConnected()
 
 void DeviceButton::onTimeout()
 {
-    int n = m_socket->write(modbus_command, sizeof(modbus_command));
-    if(n < 0){
-        m_detail->errorLog(id(), QString("send error"));
+    if(m_socket->isWritable()){
+        int n = m_socket->write(modbus_command, sizeof(modbus_command));
+        if(n < 0){
+            m_detail->errorLog(id(), QString("send error"));
+        }
     }
 
     if(QTime::currentTime().second() - m_lastet_recv.second() > 15){
         setStatus(TIMEOUT_ERR);
         m_hint->setText(QString::fromUtf8("<font color=red>上报超时</font>"));
         m_detail->errorLog(id(), "report timeout.");
+
+        m_socket->abort();
+        m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
     }
 }
 
@@ -157,7 +163,7 @@ void DeviceButton::onReadData()
     }
     hexdata += QString("\n");
 
-    qDebug() << id() << hexdata;
+    //qDebug() << id() << hexdata;
 
 //    m_detail->errorLog(id(), hexdata);
 
@@ -194,31 +200,21 @@ void DeviceButton::onReadData()
 
 void DeviceButton::onSocketError(QAbstractSocket::SocketError socketError)
 {
-    switch (socketError) {
-    case QAbstractSocket::RemoteHostClosedError:
-        m_detail->errorLog(id(), "[CONN] lost connection...");
-        break;
-    case QAbstractSocket::HostNotFoundError:
-        QMessageBox::information(this, tr("Network error"),
-                                 tr("The host was not found. Please check the "
-                                    "host name and port settings."));
-        break;
-    case QAbstractSocket::ConnectionRefusedError:
-        QMessageBox::information(this, tr("Network error"),
-                                 tr("The connection was refused by the peer. "
-                                    "Make sure the fortune server is running, "
-                                    "and check that the host name and port "
-                                    "settings are correct."));
-        break;
-    default:
-        QMessageBox::information(this, tr("Network error"),
-                                 tr("The following error occurred: %1.")
-                                 .arg(m_socket->errorString()));
-    }
+    Q_UNUSED(socketError);
 
     setStatus(DISCONN_ERR);
+
     m_hint->setText(QString::fromUtf8("<font color=red>通信错误</font>"));
     m_detail->errorLog(id(), QString("[CONN] %1").arg(m_socket->errorString()));
+
+    m_detail->errorLog(id(), QString("[CONN] try auto reconnect..."));
+    m_socket->abort();
+    m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
+}
+
+void DeviceButton::onDissconnect(){
+    m_socket->abort();
+    m_socket->connectToHost(QHostAddress(m_setting.ip), m_setting.port.toUShort());
 }
 
 void DeviceButton::onReconnAction()

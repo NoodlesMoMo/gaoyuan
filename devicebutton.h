@@ -60,6 +60,7 @@ protected slots:
     void onReadData();
     void onTimeout();
     void onReconnAction();
+    void onDissconnect();
     void onSocketError(QAbstractSocket::SocketError);
 
 private:
